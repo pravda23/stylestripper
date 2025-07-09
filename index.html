@@ -221,27 +221,19 @@
         return doc.body.innerHTML;
       }
 
-      async function getStructuredHtmlFromHuggingFace(text) {
-        const apiUrl =
-          "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3";
-        const apiKey = `${HUGGING_FACE_API_KEY}`;
+      async function runInference() {
+        const input = document.getElementById("input").value;
+        const output = document.getElementById("output");
+        output.textContent = "Loading...";
 
-        const response = await fetch(apiUrl, {
+        const res = await fetch("/api/inference", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ inputs: text }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ inputs: input }),
         });
 
-        if (!response.ok) {
-          throw new Error("Hugging Face API error: " + response.statusText);
-        }
-
-        const result = await response.json();
-        // Adjust this depending on your model's output format
-        return result.generated_text || result[0]?.generated_text || "";
+        const data = await res.json();
+        output.textContent = JSON.stringify(data, null, 2);
       }
 
       const dropZone = document.getElementById("dropZone");
