@@ -1,0 +1,85 @@
+#container {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.panel {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.panel label {
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+#inputArea {
+  width: 90%;
+  min-height: 120px;
+  max-height: 200px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  background: #fafafa;
+  font-family: Arial, sans-serif;
+  resize: vertical;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  overflow: auto;
+}
+#outputHtml {
+  width: 90%;
+  min-height: 120px;
+  max-height: 200px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  background: #fafafa;
+  font-family: Arial, sans-serif;
+  resize: vertical;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  overflow: auto;
+}
+#inputArea[contenteditable="true"] {
+  outline: none;
+}
+#fileInput {
+  margin-bottom: 10px;
+}
+#errorMsg {
+  color: #b00;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: none;
+}
+/* Add this CSS for drag-and-drop styling */
+#dropZone {
+  border: 2px dashed #aaa;
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+  color: #888;
+  margin-bottom: 16px;
+  transition: background 0.2s, border-color 0.2s;
+}
+#dropZone.dragover {
+  background: #f0f8ff;
+  border-color: #0078d7;
+  color: #0078d7;
+}
+@media (max-width: 600px) {
+  #container {
+    flex-direction: column;
+    align-items: center;
+  }
+  #inputArea,
+  #outputHtml {
+    width: 90%;
+  }
+  .panel {
+    width: 100%;
+  }
+}

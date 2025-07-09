@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Universal Rich Text Cleaner</title>
+    <link rel="stylesheet" href="/style.css" />
+    <!-- Mammoth.js for DOCX to HTML -->
+    <script src="https://unpkg.com/mammoth@1.7.0/mammoth.browser.min.js"></script>
+    <script type="module">
+      import * as pdfjsLib from "./libs/pdf.mjs";
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "./pdf.worker.mjs";
+      // Use pdfjsLib.getDocument(...)
+    </script>
+  </head>
+  <body>
+    <h1>Universal Rich Text Cleaner</h1>
+    <p>
+      Paste your content below or upload a Word (.docx). Images will be removed
+      automatically.
+    </p>
+    <div id="errorMsg"></div>
+    <!-- Place this above your file input -->
+    <div id="dropZone">Drag and drop a Word (.docx) or PDF file here</div>
+    <input
+      type="file"
+      id="fileInput"
+      accept=".docx,application/pdf"
+      style="display: none"
+    />
+    <div id="container">
+      <div class="panel">
+        <label for="inputArea">Input</label>
+        <div
+          id="inputArea"
+          contenteditable="true"
+          spellcheck="false"
+          placeholder="Paste here..."
+        ></div>
+      </div>
+      <div class="panel">
+        <label for="outputHtml">Output</label>
+        <textarea id="outputHtml" readonly></textarea>
+      </div>
+    </div>
+    <script>
+      let uploadedHtml = "";
+
+      function showError(msg) {
+        if (msg) console.error(msg);
+        const errorDiv = document.getElementById("errorMsg");
+        errorDiv.textContent = "An unknown error occurred";
+        errorDiv.style.display = "block";
+      }
+      function clearError() {
+        const errorDiv = document.getElementById("errorMsg");
+        errorDiv.textContent = "";
+        errorDiv.style.display = "none";
+      }
+
+      async function runCleaner() {
+        clearError();
+        const inputDiv = document.getElementById("inputArea");
+        let input = inputDiv.innerHTML;
+        if (!/<[a-z][\s\S]*>/i.test(input)) {
+          input = inputDiv.innerText;
+        }
+        let html = uploadedHtml || input;
+        const output = stripHtmlStyling(html);
+        document.getElementById("outputHtml").value = output;
+      }
+
+      document
+        .getElementById("fileInput")
+        .addEventListener("change", async function (e) {
+          clearError();
+          const file = e.target.files[0];
+          if (!file) return;
+          const fileType = file.type;
+
+          if (file.name.endsWith(".docx")) {
+            try {
+              const arrayBuffer = await file.arrayBuffer();
+              mammoth
+                .convertToHtml({ arrayBuffer: arrayBuffer })
+                .then(function (resultObject) {
+                  uploadedHtml = resultObject.value;
+                  // Remove images from the preview before displaying
+                  const tempDiv = document.createElement("div");
+                  tempDiv.innerHTML = uploadedHtml;
+                  tempDiv
+                    .querySelectorAll("img")
+                    .forEach((img) => img.remove());
+                  uploadedHtml = tempDiv.innerHTML;
+                  document.getElementById("inputArea").innerHTML = uploadedHtml;
+                  runCleaner();
+                })
+                .catch(function (err) {
+                  showError(err);
+                });
+            } catch (err) {
+              showError(err);
+            }
+          } else if (
+            fileType === "application/pdf" ||
+            file.name.endsWith(".pdf")
+          ) {
+            try {
+              const reader = new FileReader();
+              reader.onload = async function () {
+                try {
+                  if (
+                    !window.pdfjsLib ||
+                    typeof window.pdfjsLib.getDocument !== "function"
+                  ) {
+                    showError("pdfjsLib.getDocument is not available.");
+                    uploadedHtml = "";
+                    document.getElementById("inputArea").innerHTML = "";
+                    document.getElementById("outputHtml").value = "";
+                    return;
+                  }
+                  const typedarray = new Uint8Array(reader.result);
+                  const pdf = await window.pdfjsLib.getDocument({
+                    data: typedarray,
+                  }).promise;
+                  let text = "";
+                  for (let i = 1; i <= pdf.numPages; i++) {
+                    try {
+                      const page = await pdf.getPage(i);
+                      const content = await page.getTextContent();
+                      text +=
+                        content.items.map((item) => item.str).join(" ") + "\n";
+                    } catch (pageErr) {
+                      showError(pageErr);
+                    }
+                  }
+
+                  // Send to Hugging Face LLM for HTML structuring
+                  const html = await getStructuredHtmlFromHuggingFace(text);
+                  uploadedHtml = html;
+                  document.getElementById("inputArea").innerHTML = uploadedHtml;
+                  runCleaner();
+                } catch (pdfErr) {
+                  showError(pdfErr);
+                  uploadedHtml = "";
+                  document.getElementById("inputArea").innerHTML = "";
+                  document.getElementById("outputHtml").value = "";
+                }
+              };
+              reader.onerror = function (e) {
+                showError(e);
+              };
+              reader.readAsArrayBuffer(file);
+            } catch (err) {
+              showError(err);
+            }
+          } else {
+            showError(
+              "Unsupported file type. Please upload a .docx or .pdf file."
+            );
+          }
+        });
+
+      // Run cleaner on input or paste in the input area
+      document
+        .getElementById("inputArea")
+        .addEventListener("input", function () {
+          clearError();
+          uploadedHtml = ""; // Reset uploadedHtml if user edits/pastes
+          document
+            .getElementById("inputArea")
+            .querySelectorAll("img")
+            .forEach((img) => img.remove());
+          runCleaner();
+        });
+      document
+        .getElementById("inputArea")
+        .addEventListener("paste", function () {
+          clearError();
+          uploadedHtml = ""; // Reset uploadedHtml if user edits/pastes
+          setTimeout(() => {
+            document
+              .getElementById("inputArea")
+              .querySelectorAll("img")
+              .forEach((img) => img.remove());
+            runCleaner();
+          }, 0);
+        });
+
+      function stripHtmlStyling(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        doc.body.querySelectorAll("img").forEach((img) => img.remove());
+        doc.body.querySelectorAll("*").forEach((el) => {
+          if (el.tagName.toLowerCase() === "a") {
+            Array.from(el.attributes).forEach((attr) => {
+              if (attr.name !== "href") {
+                el.removeAttribute(attr.name);
+              }
+            });
+          } else {
+            while (el.attributes.length > 0) {
+              el.removeAttribute(el.attributes[0].name);
+            }
+          }
+        });
+
+        doc.body.querySelectorAll("div").forEach((div) => {
+          while (div.firstChild) {
+            div.parentNode.insertBefore(div.firstChild, div);
+          }
+          div.parentNode.removeChild(div);
+        });
+
+        doc.body.querySelectorAll("span").forEach((span) => {
+          while (span.firstChild) {
+            span.parentNode.insertBefore(span.firstChild, span);
+          }
+          span.parentNode.removeChild(span);
+        });
+
+        return doc.body.innerHTML;
+      }
+
+      async function getStructuredHtmlFromHuggingFace(text) {
+        const apiUrl =
+          "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3";
+        const apiKey = `${HUGGING_FACE_API_KEY}`;
+
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ inputs: text }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Hugging Face API error: " + response.statusText);
+        }
+
+        const result = await response.json();
+        // Adjust this depending on your model's output format
+        return result.generated_text || result[0]?.generated_text || "";
+      }
+
+      const dropZone = document.getElementById("dropZone");
+      const fileInput = document.getElementById("fileInput");
+
+      // Click drop zone to open file dialog
+      dropZone.addEventListener("click", () => fileInput.click());
+
+      // Highlight on drag over
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("dragover");
+      });
+      dropZone.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("dragover");
+      });
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("dragover");
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          fileInput.files = e.dataTransfer.files;
+          // Trigger the file input change event to process the file
+          fileInput.dispatchEvent(new Event("change"));
+        }
+      });
+    </script>
+  </body>
+</html>
