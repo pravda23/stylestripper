@@ -3,7 +3,7 @@ export default async function handler(req, res) {
   const apiKey = process.env.HF_API_KEY;
 
   const response = await fetch(
-    "https://api-inference.huggingface.co/models/gpt2",
+    "https://api-inference.huggingface.co/models/meta-llama/Llama-4-Scout-17B-16E-Instruct",
     {
       method: "POST",
       headers: {
@@ -15,5 +15,6 @@ export default async function handler(req, res) {
   );
 
   const result = await response.json();
+  console.log(result);
   res.status(200).json(result);
 }
