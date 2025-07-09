@@ -162,6 +162,8 @@ async function runInference() {
   const output = document.getElementById("output");
   output.textContent = "Loading...";
 
+  console.log(output);
+
   try {
     const res = await fetch("/api/inference", {
       method: "POST",
