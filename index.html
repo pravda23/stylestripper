@@ -6,11 +6,6 @@
     <link rel="stylesheet" href="/style.css" />
     <!-- Mammoth.js for DOCX to HTML -->
     <script src="https://unpkg.com/mammoth@1.7.0/mammoth.browser.min.js"></script>
-    <script type="module">
-      import * as pdfjsLib from "./libs/pdf.mjs";
-      pdfjsLib.GlobalWorkerOptions.workerSrc = "./pdf.worker.mjs";
-      // Use pdfjsLib.getDocument(...)
-    </script>
   </head>
   <body>
     <h1>Universal Rich Text Cleaner</h1>
@@ -20,13 +15,8 @@
     </p>
     <div id="errorMsg"></div>
     <!-- Place this above your file input -->
-    <div id="dropZone">Drag and drop a Word (.docx) or PDF file here</div>
-    <input
-      type="file"
-      id="fileInput"
-      accept=".docx,application/pdf"
-      style="display: none"
-    />
+    <div id="dropZone">Drag and drop a Word (.docx) file here</div>
+    <input type="file" id="fileInput" accept=".docx" style="display: none" />
     <div id="container">
       <div class="panel">
         <label for="inputArea">Input</label>
@@ -100,63 +90,8 @@
             } catch (err) {
               showError(err);
             }
-          } else if (
-            fileType === "application/pdf" ||
-            file.name.endsWith(".pdf")
-          ) {
-            try {
-              const reader = new FileReader();
-              reader.onload = async function () {
-                try {
-                  if (
-                    !window.pdfjsLib ||
-                    typeof window.pdfjsLib.getDocument !== "function"
-                  ) {
-                    showError("pdfjsLib.getDocument is not available.");
-                    uploadedHtml = "";
-                    document.getElementById("inputArea").innerHTML = "";
-                    document.getElementById("outputHtml").value = "";
-                    return;
-                  }
-                  const typedarray = new Uint8Array(reader.result);
-                  const pdf = await window.pdfjsLib.getDocument({
-                    data: typedarray,
-                  }).promise;
-                  let text = "";
-                  for (let i = 1; i <= pdf.numPages; i++) {
-                    try {
-                      const page = await pdf.getPage(i);
-                      const content = await page.getTextContent();
-                      text +=
-                        content.items.map((item) => item.str).join(" ") + "\n";
-                    } catch (pageErr) {
-                      showError(pageErr);
-                    }
-                  }
-
-                  // Send to Hugging Face LLM for HTML structuring
-                  const html = await getStructuredHtmlFromHuggingFace(text);
-                  uploadedHtml = html;
-                  document.getElementById("inputArea").innerHTML = uploadedHtml;
-                  runCleaner();
-                } catch (pdfErr) {
-                  showError(pdfErr);
-                  uploadedHtml = "";
-                  document.getElementById("inputArea").innerHTML = "";
-                  document.getElementById("outputHtml").value = "";
-                }
-              };
-              reader.onerror = function (e) {
-                showError(e);
-              };
-              reader.readAsArrayBuffer(file);
-            } catch (err) {
-              showError(err);
-            }
           } else {
-            showError(
-              "Unsupported file type. Please upload a .docx or .pdf file."
-            );
+            showError("Unsupported file type. Please upload a .docx file.");
           }
         });
 
