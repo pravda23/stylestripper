@@ -130,32 +130,13 @@ async function runInference() {
   const input = document.getElementById("outputHtml").value;
   const output = document.getElementById("output");
   output.textContent = "Loading...";
-  const apiKey = process.env.HF_API_KEY;
 
   try {
-    const res = await fetch(
-      "https://router.huggingface.co/novita/v3/openai/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          // Authorization: `Bearer ${apiKey}`,
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "meta-llama/llama-4-scout-17b-16e-instruct",
-          messages: [
-            {
-              role: "user",
-              content:
-                "return the first 10 words from this article only, with no explainer text: " +
-                input,
-            },
-          ],
-          max_tokens: 4096,
-        }),
-      }
-    );
+    const res = await fetch("/api/inference", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ inputs: input }),
+    });
 
     if (!res.ok) {
       const errText = await res.text();
