@@ -1,3 +1,10 @@
+import { clickDropZone, highlightDragOver } from "./utils/utils.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+  clickDropZone();
+  highlightDragOver();
+});
+
 let uploadedHtml = "";
 
 function showError(msg) {
@@ -11,7 +18,6 @@ function clearError() {
   errorDiv.textContent = "";
   errorDiv.style.display = "none";
 }
-
 async function runCleaner() {
   clearError();
   const inputDiv = document.getElementById("inputArea");
@@ -24,6 +30,7 @@ async function runCleaner() {
   document.getElementById("outputHtml").value = output;
 }
 
+// Run cleaner on drag/upload
 document
   .getElementById("fileInput")
   .addEventListener("change", async function (e) {
@@ -58,7 +65,7 @@ document
     }
   });
 
-// Run cleaner on input or paste in the input area
+// Run cleaner on paste
 document.getElementById("inputArea").addEventListener("input", function () {
   clearError();
   uploadedHtml = ""; // Reset uploadedHtml if user edits/pastes
@@ -68,9 +75,11 @@ document.getElementById("inputArea").addEventListener("input", function () {
     .forEach((img) => img.remove());
   runCleaner();
 });
+
+// Reset uploadedHtml if user edits/pastes
 document.getElementById("inputArea").addEventListener("paste", function () {
   clearError();
-  uploadedHtml = ""; // Reset uploadedHtml if user edits/pastes
+  uploadedHtml = "";
   setTimeout(() => {
     document
       .getElementById("inputArea")
@@ -80,6 +89,7 @@ document.getElementById("inputArea").addEventListener("paste", function () {
   }, 0);
 });
 
+// Remove all HTML tags except <a>
 function stripHtmlStyling(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
@@ -115,73 +125,50 @@ function stripHtmlStyling(html) {
   return doc.body.innerHTML;
 }
 
+// Run inference on button click
 async function runInference() {
-  const input = document.getElementById("input").value;
+  const input = document.getElementById("outputHtml").value;
   const output = document.getElementById("output");
   output.textContent = "Loading...";
-
-  const res = await fetch("/api/inference", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ inputs: input }),
-  });
-
-  const data = await res.json();
-  output.textContent = JSON.stringify(data, null, 2);
-}
-
-const dropZone = document.getElementById("dropZone");
-const fileInput = document.getElementById("fileInput");
-
-// Click drop zone to open file dialog
-dropZone.addEventListener("click", () => fileInput.click());
-
-// Highlight on drag over
-dropZone.addEventListener("dragover", (e) => {
-  e.preventDefault();
-  dropZone.classList.add("dragover");
-});
-dropZone.addEventListener("dragleave", (e) => {
-  e.preventDefault();
-  dropZone.classList.remove("dragover");
-});
-dropZone.addEventListener("drop", (e) => {
-  e.preventDefault();
-  dropZone.classList.remove("dragover");
-  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-    fileInput.files = e.dataTransfer.files;
-    // Trigger the file input change event to process the file
-    fileInput.dispatchEvent(new Event("change"));
-  }
-});
-
-// run inference on button click
-
-async function runInference() {
-  const input = document.getElementById("output").value;
-  const output = document.getElementById("output");
-  output.textContent = "Loading...";
-
-  console.log(output);
 
   try {
-    const res = await fetch("/api/inference", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        inputs: "Convert this news headline into sentence case: Man Bites Dog",
-      }),
-    });
+    const res = await fetch(
+      "https://router.huggingface.co/novita/v3/openai/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          // Authorization: `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "meta-llama/llama-4-scout-17b-16e-instruct",
+          messages: [
+            {
+              role: "user",
+              content:
+                "return the first 10 words from this article only, with no explainer text: " +
+                input,
+            },
+          ],
+          max_tokens: 4096,
+        }),
+      }
+    );
 
     if (!res.ok) {
-      const errText = await res.text(); // Try to get any error message
+      const errText = await res.text();
       throw new Error(`Server error (${res.status}): ${errText}`);
     }
 
-    const data = await res.json(); // This will now only run if content exists
+    const data = await res.json();
+    console.log(data.choices[0].message.content);
     output.textContent = JSON.stringify(data, null, 2);
   } catch (err) {
     console.error("Inference error:", err);
     output.textContent = "Failed to get response from model. Check server/API.";
   }
 }
+
+// add runInference to the global scope so it can be called from HTML
+window.runInference = runInference;
