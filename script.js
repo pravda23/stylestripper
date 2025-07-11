@@ -152,7 +152,7 @@ async function runInference() {
     const cleanText = rawText
       .replace(/[*_~`#>]+/g, "") // Remove *, _, ~, `, #, > etc.
       .replace(/\[(.*?)\]\(.*?\)/g, "$1") // Remove markdown links
-      .replace(/\\n/g, "\n"); // Convert literal \n to newlines
+      .replace(/\\n/g, "\n\n"); // Convert literal \n to newlines
 
     // Clear previous output
     output.innerHTML = "";

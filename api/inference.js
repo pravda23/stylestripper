@@ -9,7 +9,7 @@ export default async function (req, res) {
   const { inputs } = req.body;
 
   const prompt =
-    "1. return the title of the article in sentence case prefixed by 'Title', also capitalizing the first letter of every word which follows a colon. 2. return a one-sentence summary of the article prefixed by 'Summary'. do not include any other text or explanation.";
+    "1. return the title of the article in sentence case only. 2. return a one-sentence summary of the article only. do not include any other text or explanation.";
 
   try {
     const response = await fetch(
