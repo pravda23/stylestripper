@@ -1,3 +1,4 @@
+// renamed 03
 function removeMarkdown(text) {
   return text
     .replace(/\*\*(.*?)\*\*/g, "$1") // bold **text**
