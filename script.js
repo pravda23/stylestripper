@@ -130,6 +130,7 @@ async function runInference() {
   const input = document.getElementById("outputHtml").value;
   const output = document.getElementById("output");
   output.textContent = "Loading...";
+  const apiKey = process.env.HF_API_KEY;
 
   try {
     const res = await fetch(
