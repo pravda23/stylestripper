@@ -127,12 +127,17 @@ function stripHtmlStyling(html) {
 
 // Run inference on button click
 async function runInference() {
+  const apiURL =
+    location.hostname === "localhost"
+      ? "http://localhost:3000/api/inference"
+      : "https://stylestripper.vercel.app/api/inference";
+
   const input = document.getElementById("outputHtml").value;
   const output = document.getElementById("output");
   output.textContent = "Loading...";
 
   try {
-    const res = await fetch("https://stylestripper.vercel.app/api/inference", {
+    const res = await fetch(`${apiURL}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ inputs: input }),
@@ -144,6 +149,7 @@ async function runInference() {
     }
 
     const data = await res.json();
+    console.log(data);
     const outputData = data.choices[0].message.content;
     output.textContent = JSON.stringify(outputData, null, 2);
   } catch (err) {
