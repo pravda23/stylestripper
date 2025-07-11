@@ -132,7 +132,7 @@ async function runInference() {
   output.textContent = "Loading...";
 
   try {
-    const res = await fetch("/api/inference", {
+    const res = await fetch("https://stylestripper.vercel.app/api/inference", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ inputs: input }),
@@ -144,8 +144,8 @@ async function runInference() {
     }
 
     const data = await res.json();
-    console.log(data.choices[0].message.content);
-    output.textContent = JSON.stringify(data, null, 2);
+    const outputData = data.choices[0].message.content;
+    output.textContent = JSON.stringify(outputData, null, 2);
   } catch (err) {
     console.error("Inference error:", err);
     output.textContent = "Failed to get response from model. Check server/API.";
