@@ -1,15 +1,17 @@
 export default async function (req, res) {
-  console.log("Received request:", req.method, req.body);
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Only POST requests are allowed" });
   }
 
   const apiKey = process.env.HF_API_KEY;
-  console.log(apiKey);
-  const { inputs } = req.body;
+  const { inputs, prompt } = req.body;
 
-  const prompt =
-    "1. return the title of the article in sentence case only. 2. return a one-sentence summary of the article only. do not include any other text or explanation.";
+  console.log("Inference request:", prompt, inputs);
+
+  if (!prompt) {
+    console.error("Missing promp");
+    return res.status(400).json({ error: "Missing prompt" });
+  }
 
   try {
     const response = await fetch(

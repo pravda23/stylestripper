@@ -1,4 +1,4 @@
-import { clickDropZone, highlightDragOver } from "./utils/utils.js";
+import { clickDropZone, highlightDragOver, autoResize } from "./utils/utils.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   clickDropZone();
@@ -20,7 +20,7 @@ function clearError() {
 }
 async function runCleaner() {
   clearError();
-  const inputDiv = document.getElementById("inputArea");
+  const inputDiv = document.getElementById("previewArea");
   let input = inputDiv.innerHTML;
   if (!/<[a-z][\s\S]*>/i.test(input)) {
     input = inputDiv.innerText;
@@ -28,6 +28,7 @@ async function runCleaner() {
   let html = uploadedHtml || input;
   const output = stripHtmlStyling(html);
   document.getElementById("outputHtml").value = output;
+  autoResize(); // resize the output box
 }
 
 // Run cleaner on drag/upload
@@ -51,7 +52,7 @@ document
             tempDiv.innerHTML = uploadedHtml;
             tempDiv.querySelectorAll("img").forEach((img) => img.remove());
             uploadedHtml = tempDiv.innerHTML;
-            document.getElementById("inputArea").innerHTML = uploadedHtml;
+            document.getElementById("previewArea").innerHTML = uploadedHtml;
             runCleaner();
           })
           .catch(function (err) {
@@ -66,23 +67,23 @@ document
   });
 
 // Run cleaner on paste
-document.getElementById("inputArea").addEventListener("input", function () {
+document.getElementById("previewArea").addEventListener("input", function () {
   clearError();
   uploadedHtml = ""; // Reset uploadedHtml if user edits/pastes
   document
-    .getElementById("inputArea")
+    .getElementById("previewArea")
     .querySelectorAll("img")
     .forEach((img) => img.remove());
   runCleaner();
 });
 
 // Reset uploadedHtml if user edits/pastes
-document.getElementById("inputArea").addEventListener("paste", function () {
+document.getElementById("previewArea").addEventListener("paste", function () {
   clearError();
   uploadedHtml = "";
   setTimeout(() => {
     document
-      .getElementById("inputArea")
+      .getElementById("previewArea")
       .querySelectorAll("img")
       .forEach((img) => img.remove());
     runCleaner();
@@ -126,7 +127,7 @@ function stripHtmlStyling(html) {
 }
 
 // Run inference on button click
-async function runInference() {
+async function runInference(prompt) {
   const input = document.getElementById("outputHtml").value;
   const output = document.getElementById("output");
   output.textContent = "Loading...";
@@ -135,8 +136,9 @@ async function runInference() {
     const res = await fetch("/api/inference", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ inputs: input }),
+      body: JSON.stringify({ inputs: input, prompt: prompt }),
     });
+    console.log("Sending to inference:", { prompt, input });
 
     if (!res.ok) {
       const errText = await res.text();
@@ -161,11 +163,13 @@ async function runInference() {
     const pre = document.createElement("pre");
     pre.textContent = cleanText;
     pre.style.whiteSpace = "pre-wrap";
-    pre.style.background = "#f9f9f9";
+    pre.style.background = "#1e1e1e";
+    pre.style.color = "#e0e0e0";
     pre.style.padding = "10px";
     pre.style.border = "1px solid #ccc";
     pre.style.borderRadius = "4px";
     pre.style.fontFamily = "monospace";
+    pre.textContent = cleanText;
 
     // Copy button
     const copyBtn = document.createElement("button");

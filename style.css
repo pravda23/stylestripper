@@ -30,7 +30,8 @@ body {
 }
 
 textarea,
-#inputArea {
+#previewArea,
+#outputHtml {
   width: 90%;
   min-height: 120px;
   max-height: 200px;
@@ -43,10 +44,6 @@ textarea,
   box-sizing: border-box;
   margin-bottom: 10px;
   overflow: auto;
-}
-
-#inputArea[contenteditable="true"] {
-  outline: none;
 }
 
 #output {
@@ -64,6 +61,16 @@ textarea,
   color: #333;
   font-family: monospace;
   margin: 0;
+}
+
+pre {
+  white-space: pre-wrap;
+  color: #e0e0e0;
+  background: #1e1e1e;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: monospace;
 }
 
 #fileInput {
@@ -117,13 +124,18 @@ pre {
   white-space: pre-wrap;
 }
 
+.preformatted {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+}
+
 @media (max-width: 600px) {
   #container {
     flex-direction: column;
     align-items: center;
   }
 
-  #inputArea,
+  #previewArea,
   #outputHtml {
     width: 90%;
   }

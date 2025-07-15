@@ -19,9 +19,9 @@
     <input type="file" id="fileInput" accept=".docx" style="display: none" />
     <div id="container">
       <div class="panel">
-        <label for="inputArea">Preview</label>
+        <label for="previewArea">Preview</label>
         <div
-          id="inputArea"
+          id="previewArea"
           contenteditable="true"
           spellcheck="false"
           placeholder="Paste here..."
@@ -32,9 +32,25 @@
         <textarea id="outputHtml" readonly></textarea>
       </div>
     </div>
-    <h1>AI output</h1>
 
-    <button onclick="runInference()">Run</button>
+    <button
+      id="title"
+      onclick="runInference(`output article title in sentence case. do not include any explainer text in the response. if a word follows a colon, capitalize it. do not use quotes. do not use the word 'title'. if the response begins with explainer text like 'here is the title ', remove it.`)"
+    >
+      Title
+    </button>
+    <button
+      id="intro"
+      onclick="runInference(`output a 50-word summary of the article contents`)"
+    >
+      Intro
+    </button>
+    <button
+      id="body"
+      onclick="runInference(`output the body of the article in clean html. convert all headings to sentence case`)"
+    >
+      Body
+    </button>
     <pre id="output"></pre>
 
     <script type="module" src="script.js"></script>

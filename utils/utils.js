@@ -1,3 +1,4 @@
+// makes dropzone clickable
 export function clickDropZone() {
   const dropZone = document.getElementById("dropZone");
   const fileInput = document.getElementById("fileInput");
@@ -30,6 +31,7 @@ export function clickDropZone() {
   });
 }
 
+// highlights dropzone when dragging over it
 export function highlightDragOver() {
   const dropZone = document.getElementById("dropZone");
   dropZone.addEventListener("dragover", () => {
@@ -43,4 +45,16 @@ export function highlightDragOver() {
   dropZone.addEventListener("drop", () => {
     dropZone.classList.remove("highlight");
   });
+}
+
+// resizes HTML output box
+
+export function autoResize() {
+  const outputHtml = document.getElementById("outputHtml");
+
+  outputHtml.addEventListener("input", autoResize);
+  window.addEventListener("load", autoResize);
+
+  outputHtml.style.height = "auto" || "200px"; // Reset height
+  outputHtml.style.height = outputHtml.scrollHeight + "px";
 }
