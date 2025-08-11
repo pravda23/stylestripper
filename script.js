@@ -1,3 +1,4 @@
+import prompts from "./prompts.js";
 import { clickDropZone, highlightDragOver, autoResize } from "./utils/utils.js";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -6,6 +7,17 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 let uploadedHtml = "";
+
+document.addEventListener("DOMContentLoaded", () => {
+  Object.keys(prompts).forEach((key) => {
+    const btn = document.getElementById(key);
+    if (btn) {
+      btn.addEventListener("click", () => {
+        runInference(prompts[key]);
+      });
+    }
+  });
+});
 
 function showError(msg) {
   if (msg) console.error(msg);
