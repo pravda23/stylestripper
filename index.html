@@ -9,34 +9,40 @@
     <script src="https://unpkg.com/mammoth@1.7.0/mammoth.browser.min.js"></script>
   </head>
   <body>
-    <p>
-      Paste your content below or upload a Word (.docx). Inline images will be
-      removed.
-    </p>
+    <h1>Stylestripper</h1>
+    <h3>LLM text and HTML formatter for sportanddev CMS</h3>
     <div id="errorMsg"></div>
     <!-- Place this above your file input -->
-    <div id="dropZone">Drag and drop a Word (.docx) file here</div>
+    <div id="dropZone">
+      Drag and drop a Word (.docx) file here. Inline images will be removed.
+    </div>
     <input type="file" id="fileInput" accept=".docx" style="display: none" />
     <div id="container">
       <div class="panel">
-        <label for="previewArea">Preview</label>
+        <label for="previewArea">Rich text preview</label>
         <div
           id="previewArea"
           contenteditable="true"
           spellcheck="false"
-          placeholder="Paste here..."
+          placeholder="TIP: you can also paste rich text or plain text here"
         ></div>
       </div>
       <div class="panel">
-        <label for="outputHtml">HTML</label>
-        <textarea id="outputHtml" readonly></textarea>
+        <label for="outputHtml">HTML preview</label>
+        <textarea
+          id="outputHtml"
+          readonly
+          placeholder="HTML will appear here"
+        ></textarea>
       </div>
     </div>
+    <p>Select what you want the LLM to output:</p>
     <div style="display: flex; justify-content: center; gap: 10px">
       <button id="title">Title</button>
       <button id="intro">Intro</button>
       <button id="body">Body</button>
       <button id="sdgs">SDGs</button>
+      <button id="country">Countries</button>
     </div>
     <pre id="output"></pre>
 
