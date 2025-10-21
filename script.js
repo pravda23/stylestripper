@@ -1,5 +1,10 @@
 import prompts from "./prompts.js";
 import { clickDropZone, highlightDragOver, autoResize } from "./utils/utils.js";
+import * as pdfjsLib from "https://unpkg.com/pdfjs-dist@4.3.136/build/pdf.mjs";
+
+// Set worker source to a CDN as well
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  "https://unpkg.com/pdfjs-dist@4.3.136/build/pdf.worker.min.mjs";
 
 document.addEventListener("DOMContentLoaded", () => {
   clickDropZone();
@@ -52,29 +57,43 @@ document
     if (!file) return;
     const fileType = file.type;
 
-    if (file.name.endsWith(".docx")) {
-      try {
+    try {
+      if (file.name.endsWith(".docx")) {
+        // DOCX handling
         const arrayBuffer = await file.arrayBuffer();
-        mammoth
-          .convertToHtml({ arrayBuffer: arrayBuffer })
-          .then(function (resultObject) {
-            uploadedHtml = resultObject.value;
-            // Remove images from the preview before displaying
-            const tempDiv = document.createElement("div");
-            tempDiv.innerHTML = uploadedHtml;
-            tempDiv.querySelectorAll("img").forEach((img) => img.remove());
-            uploadedHtml = tempDiv.innerHTML;
-            document.getElementById("previewArea").innerHTML = uploadedHtml;
-            runCleaner();
-          })
-          .catch(function (err) {
-            showError(err);
-          });
-      } catch (err) {
-        showError(err);
+        const resultObject = await mammoth.convertToHtml({ arrayBuffer });
+        uploadedHtml = resultObject.value;
+
+        // Remove images before previewing
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = uploadedHtml;
+        tempDiv.querySelectorAll("img").forEach((img) => img.remove());
+        uploadedHtml = tempDiv.innerHTML;
+        document.getElementById("previewArea").innerHTML = uploadedHtml;
+        runCleaner();
+      } else if (file.name.endsWith(".pdf")) {
+        // PDF handling
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let textContent = "";
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          const strings = content.items.map((item) => item.str);
+          textContent += strings.join(" ") + "\n\n";
+        }
+
+        // Wrap text in simple HTML for consistency
+        uploadedHtml = `<p>${textContent.replace(/\n/g, "<br>")}</p>`;
+        document.getElementById("previewArea").innerHTML = uploadedHtml;
+        runCleaner();
+      } else {
+        showError("Unsupported file type. Please upload a .docx or .pdf file.");
       }
-    } else {
-      showError("Unsupported file type. Please upload a .docx file.");
+    } catch (err) {
+      console.error(err);
+      showError("Failed to process file: " + err.message);
     }
   });
 
@@ -150,7 +169,7 @@ async function runInference(prompt) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ inputs: input, prompt: prompt }),
     });
-    console.log("Sending to inference:", { prompt, input });
+    // console.log("Sending to inference:", { prompt, input });
 
     if (!res.ok) {
       const errText = await res.text();
@@ -158,8 +177,10 @@ async function runInference(prompt) {
     }
 
     const data = await res.json();
+    console.log(data);
 
     // Get the raw model output
+
     const rawText = data.choices?.[0]?.message?.content || "No response";
 
     // Strip markdown syntax (basic)
