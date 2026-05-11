@@ -1,53 +1,117 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Stylestripper</title>
+    <title>sportanddev AI categorisation and text formatter tool</title>
     <link rel="stylesheet" href="/style.css" />
 
     <!-- Mammoth.js for DOCX to HTML -->
     <script src="https://unpkg.com/mammoth@1.7.0/mammoth.browser.min.js"></script>
   </head>
   <body>
-    <h1>Stylestripper</h1>
-    <h3>LLM text and HTML formatter for sportanddev CMS</h3>
-    <div id="errorMsg"></div>
-    <!-- Place this above your file input -->
-    <div id="dropZone">
-      Drag and drop a Word (.docx) or PDF file here. Inline images will be
-      removed.
-    </div>
-    <input type="file" id="fileInput" accept=".docx" style="display: none" />
-    <div id="container">
-      <div class="panel">
-        <label for="previewArea">Rich text preview</label>
+    <section class="accordion-section" id="textFormatterSection">
+      <div
+        class="accordion-title"
+        id="formatterToggle"
+        role="button"
+        tabindex="0"
+        aria-expanded="true"
+      >
+        <h3>Upload your text</h3>
+        <span class="accordion-chevron">▾</span>
+      </div>
+      <div class="accordion-content">
+        <div class="columns-container">
+          <div class="leftCol">
+            <div id="errorMsg"></div>
+            <div id="dropZone">
+              Drag and drop a Word (.docx) or PDF file here. <br />Images will
+              be removed.
+            </div>
+            <div
+              style="
+                display: flex;
+                justify-content: center;
+                padding: 8px;
+                margin-top: 8px;
+              "
+            >
+              OR
+            </div>
+            <div
+              id="previewArea"
+              contenteditable="true"
+              spellcheck="false"
+              placeholder="Paste your text here."
+            ></div>
+          </div>
+
+          <div class="rightCol">
+            <div id="container">
+              <div class="panel">
+                <!-- <label for="outputHtml">HTML preview</label> -->
+                <textarea
+                  id="outputHtml"
+                  readonly
+                  placeholder="HTML code will appear here"
+                ></textarea>
+                <div class="html-refine-block">
+                  <label for="htmlPrompt">Refine returned HTML</label>
+                  <div class="html-refine-row">
+                    <input
+                      id="htmlPrompt"
+                      type="text"
+                      placeholder="Enter a prompt to refine or edit the returned HTML"
+                    />
+                    <button id="sendHtmlButton" type="button">Send</button>
+                    <button id="copyHtmlButton" type="button">Copy</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <input
+          type="file"
+          id="fileInput"
+          accept=".docx"
+          style="display: none"
+        />
+      </div>
+    </section>
+
+    <section class="accordion-section" id="categorisationSection">
+      <div
+        class="accordion-title"
+        id="categoriseToggle"
+        role="button"
+        tabindex="0"
+        aria-expanded="true"
+      >
+        <h3>Categorise your uploaded text</h3>
+        <span class="accordion-chevron">▾</span>
+      </div>
+      <div class="accordion-content">
         <div
-          id="previewArea"
-          contenteditable="true"
-          spellcheck="false"
-          placeholder="TIP: you can also paste rich text or plain text here"
-        ></div>
+          style="
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+          "
+        >
+          <button id="title">Title</button>
+          <button id="intro">Intro</button>
+          <button id="sdg">SDGs</button>
+          <button id="theme">Themes</button>
+          <button id="targetGroup">Target Groups</button>
+          <button id="sport">Sports</button>
+          <button id="country">Countries</button>
+        </div>
+        <pre id="output"></pre>
       </div>
-      <div class="panel">
-        <label for="outputHtml">HTML preview</label>
-        <textarea
-          id="outputHtml"
-          readonly
-          placeholder="HTML will appear here"
-        ></textarea>
-      </div>
-    </div>
-    <p>Select what you want the LLM to output:</p>
-    <div style="display: flex; justify-content: center; gap: 10px">
-      <button id="title">Title</button>
-      <button id="intro">Intro</button>
-      <button id="sdg">SDGs</button>
-      <button id="theme">Themes</button>
-      <button id="targetGroup">Target Groups</button>
-      <button id="sport">Sports</button>
-      <button id="country">Countries</button>
-    </div>
-    <pre id="output"></pre>
+    </section>
 
     <script type="module" src="script.js"></script>
   </body>

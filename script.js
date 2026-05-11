@@ -9,9 +9,31 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 document.addEventListener("DOMContentLoaded", () => {
   clickDropZone();
   highlightDragOver();
+  setupAccordion("formatterToggle", "textFormatterSection");
+  setupAccordion("categoriseToggle", "categorisationSection");
+  setupHtmlRefineControls();
 });
 
 let uploadedHtml = "";
+
+function setupAccordion(toggleId, sectionId) {
+  const toggle = document.getElementById(toggleId);
+  const section = document.getElementById(sectionId);
+  if (!toggle || !section) return;
+
+  const updateState = () => {
+    const collapsed = section.classList.toggle("collapsed");
+    toggle.setAttribute("aria-expanded", String(!collapsed));
+  };
+
+  toggle.addEventListener("click", updateState);
+  toggle.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      updateState();
+    }
+  });
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   Object.keys(prompts).forEach((key) => {
@@ -155,6 +177,82 @@ function stripHtmlStyling(html) {
   });
 
   return doc.body.innerHTML;
+}
+
+function stripMarkdown(text) {
+  return text
+    .replace(/```(?:html)?\s*([\s\S]*?)```/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\[(.*?)\]\(.*?\)/g, "$1")
+    .replace(/[\*_~#>]+/g, "")
+    .replace(/\\n/g, "\n\n");
+}
+
+function setupHtmlRefineControls() {
+  const promptInput = document.getElementById("htmlPrompt");
+  const sendButton = document.getElementById("sendHtmlButton");
+  const copyButton = document.getElementById("copyHtmlButton");
+
+  if (sendButton && promptInput) {
+    sendButton.addEventListener("click", () => {
+      refineHtml(promptInput.value);
+    });
+
+    promptInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        sendButton.click();
+      }
+    });
+  }
+
+  if (copyButton) {
+    copyButton.addEventListener("click", async () => {
+      const html = document.getElementById("outputHtml").value;
+      try {
+        await navigator.clipboard.writeText(html);
+        copyButton.textContent = "Copied";
+        setTimeout(() => (copyButton.textContent = "Copy"), 2000);
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  }
+}
+
+async function refineHtml(prompt) {
+  clearError();
+  if (!prompt || !prompt.trim()) {
+    showError("Please enter a prompt to refine the HTML.");
+    return;
+  }
+
+  const html = document.getElementById("outputHtml").value;
+  if (!html) {
+    showError("There is no HTML to refine.");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/inference", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ inputs: html, prompt }),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Server error (${res.status}): ${errText}`);
+    }
+
+    const data = await res.json();
+    const rawText = data.choices?.[0]?.message?.content || "";
+    const cleanText = stripMarkdown(rawText);
+    document.getElementById("outputHtml").value = cleanText;
+  } catch (err) {
+    console.error(err);
+    showError("Failed to refine HTML: " + (err.message || "unknown error"));
+  }
 }
 
 // Run inference on button click
