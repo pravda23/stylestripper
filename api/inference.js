@@ -27,7 +27,7 @@ export default async function (req, res) {
           messages: [{ role: "user", content: prompt + " " + inputs }],
           max_tokens: 2048,
         }),
-      }
+      },
     );
 
     const result = await response.json();

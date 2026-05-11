@@ -233,6 +233,8 @@ async function refineHtml(prompt) {
     return;
   }
 
+  prompt += "; ensure that the response is syntactically correct html.";
+
   try {
     const res = await fetch("/api/inference", {
       method: "POST",

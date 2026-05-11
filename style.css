@@ -69,6 +69,8 @@ textarea,
   display: flex;
   flex-direction: column;
   gap: 6px;
+  position: relative;
+  margin-top: auto;
 }
 
 .html-refine-row {
