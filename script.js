@@ -261,6 +261,7 @@ async function refineHtml(prompt) {
 
 // Run inference on button click
 async function runInference(prompt) {
+  console.log("prompt after runInference button click " + prompt);
   const input = document.getElementById("outputHtml").value;
   const output = document.getElementById("output");
   output.textContent = "Loading...";
