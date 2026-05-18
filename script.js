@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   highlightDragOver();
   setupAccordion("formatterToggle", "textFormatterSection");
   setupAccordion("categoriseToggle", "categorisationSection");
+  // setupAccordion("socialToggle", "socialMediaSection");
   setupHtmlRefineControls();
 });
 
@@ -188,6 +189,7 @@ function stripMarkdown(text) {
     .replace(/\\n/g, "\n\n");
 }
 
+// Refines HTML input on button click
 function setupHtmlRefineControls() {
   const promptInput = document.getElementById("htmlPrompt");
   const sendButton = document.getElementById("sendHtmlButton");
@@ -269,7 +271,6 @@ async function runInference(prompt) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ inputs: input, prompt: prompt }),
     });
-    // console.log("Sending to inference:", { prompt, input });
 
     if (!res.ok) {
       const errText = await res.text();
@@ -277,7 +278,6 @@ async function runInference(prompt) {
     }
 
     const data = await res.json();
-    console.log(data);
 
     // Get the raw model output
 

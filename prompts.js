@@ -13,4 +13,8 @@ export default {
   country:
     "output a list of all countries that are mentioned in the article. return only the list of countries with no explainer text. output a maximum of 5 items",
   body: "output the body of the article in clean html. convert all headings to sentence case",
+  socialShort:
+    "output a 50-word summary of the text in the article. return only the text, with no explainer text.",
+  socialLong:
+    "output a 150-word summary of the text in the article. return only the text, with no explainer text.",
 };

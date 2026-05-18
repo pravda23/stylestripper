@@ -9,7 +9,7 @@ export default async function (req, res) {
   console.log("Inference request:", prompt, inputs);
 
   if (!prompt) {
-    console.error("Missing promp");
+    console.error("Missing prompt");
     return res.status(400).json({ error: "Missing prompt" });
   }
 
