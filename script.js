@@ -282,7 +282,7 @@ async function runInference(prompt) {
 
     // Get the raw model output
 
-    console.log("data.choices[0] " + data.choices[0]);
+    console.log("data.choices?.[0] " + data.choices?.[0]);
     console.log("data.choices... " + data.choices?.[0]?.message?.content);
     const rawText = data.choices?.[0]?.message?.content || "No response";
 
