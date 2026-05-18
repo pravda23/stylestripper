@@ -282,7 +282,8 @@ async function runInference(prompt) {
 
     // Get the raw model output
 
-    console.log(data.choices?.[0]?.message?.content);
+    console.log("data " + data);
+    console.log("data.choices... " + data.choices?.[0]?.message?.content);
     const rawText = data.choices?.[0]?.message?.content || "No response";
 
     // Strip markdown syntax (basic)
