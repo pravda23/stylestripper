@@ -31,7 +31,7 @@ export default async function (req, res) {
     );
 
     const result = await response.json();
-    console.log("HF API response: " + result);
+    console.log("HF API response:", JSON.stringify(result, null, 2));
     res.status(200).json(result);
   } catch (err) {
     console.error("API error:", err);

@@ -250,13 +250,26 @@ async function refineHtml(prompt) {
     }
 
     const data = await res.json();
-    const rawText = data.choices?.[0]?.message?.content || "";
+    const rawText = extractInferenceText(data);
     const cleanText = stripMarkdown(rawText);
     document.getElementById("outputHtml").value = cleanText;
   } catch (err) {
     console.error(err);
     showError("Failed to refine HTML: " + (err.message || "unknown error"));
   }
+}
+
+function extractInferenceText(data) {
+  return (
+    data?.choices?.[0]?.message?.content ||
+    data?.choices?.[0]?.text ||
+    data?.output?.[0]?.content ||
+    data?.output?.[0]?.generated_text ||
+    data?.output ||
+    data?.generated_text ||
+    data?.text ||
+    ""
+  );
 }
 
 // Run inference on button click
@@ -281,10 +294,9 @@ async function runInference(prompt) {
     const data = await res.json();
 
     // Get the raw model output
-
-    console.log("data.choices?.[0] " + data.choices?.[0]);
-    console.log("data.choices... " + data.choices?.[0]?.message?.content);
-    const rawText = data.choices?.[0]?.message?.content || "No response";
+    const rawText = extractInferenceText(data) || "No response";
+    console.log("inference response:", JSON.stringify(data, null, 2));
+    console.log("parsed rawText:", rawText);
 
     // Strip markdown syntax (basic)
     const cleanText = rawText
