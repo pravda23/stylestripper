@@ -17,4 +17,6 @@ export default {
     "output a 50-word summary of the text in the article. return only the text, with no explainer text.",
   socialLong:
     "output a 150-word summary of the text in the article. return only the text, with no explainer text.",
+  keyPoints:
+    "summarize the text to max 10 key points of max 50 words each. the format of the return data should resemble a copyable list, with each point being preceded by a — (alt+0151 long hyphen)",
 };

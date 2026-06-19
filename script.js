@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   highlightDragOver();
   setupAccordion("formatterToggle", "textFormatterSection");
   setupAccordion("categoriseToggle", "categorisationSection");
-  // setupAccordion("socialToggle", "socialMediaSection");
+  setupAccordion("socialCopyToggle", "socialCopySection");
   setupHtmlRefineControls();
 });
 
