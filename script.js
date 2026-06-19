@@ -185,7 +185,7 @@ function stripMarkdown(text) {
     .replace(/```(?:html)?\s*([\s\S]*?)```/g, "$1")
     .replace(/`([^`]+)`/g, "$1")
     .replace(/\[(.*?)\]\(.*?\)/g, "$1")
-    .replace(/[\*_~#>]+/g, "")
+    .replace(/[\*_~#]+/g, "")
     .replace(/\\n/g, "\n\n");
 }
 
