@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btn = document.getElementById(key);
     if (btn) {
       btn.addEventListener("click", () => {
-        runInference(prompts[key]);
+        runInference(key, prompts[key]);
       });
     }
   });
@@ -282,11 +282,29 @@ function extractInferenceText(data) {
 }
 
 // Run inference on button click
-async function runInference(prompt) {
+async function runInference(key, prompt) {
   console.log("prompt after runInference button click " + prompt);
   const input = document.getElementById("outputHtml").value;
-  const output = document.getElementById("output");
-  output.textContent = "Loading...";
+
+  const socialKeys = ["keyPoints", "socialShort", "socialLong"];
+  const taxonomyKeys = [
+    "title",
+    "intro",
+    "sdg",
+    "theme",
+    "targetGroup",
+    "sport",
+    "country",
+  ];
+
+  const outputId = socialKeys.includes(key)
+    ? "socialOutput"
+    : taxonomyKeys.includes(key)
+      ? "taxonomyOutput"
+      : "taxonomyOutput";
+
+  const output = document.getElementById(outputId);
+  if (output) output.textContent = "Loading...";
 
   try {
     const res = await fetch("/api/inference", {
