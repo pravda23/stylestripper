@@ -235,7 +235,13 @@ async function refineHtml(prompt) {
     return;
   }
 
-  prompt += "; ensure that the response is syntactically correct.";
+  const sendButton = document.getElementById("sendHtmlButton");
+  const originalText = sendButton.textContent;
+  sendButton.disabled = true;
+  sendButton.textContent = "Loading...";
+
+  prompt +=
+    "; return only result text; include no additional explainer text; ensure that the response is syntactically correct.";
   console.log(prompt);
   try {
     const res = await fetch("/api/inference", {
@@ -256,6 +262,9 @@ async function refineHtml(prompt) {
   } catch (err) {
     console.error(err);
     showError("Failed to refine HTML: " + (err.message || "unknown error"));
+  } finally {
+    sendButton.disabled = false;
+    sendButton.textContent = originalText;
   }
 }
 

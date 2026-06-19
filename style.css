@@ -71,6 +71,7 @@ textarea,
   gap: 6px;
   position: relative;
   margin-top: auto;
+  padding: 8px;
 }
 
 .html-refine-row {
@@ -194,7 +195,7 @@ textarea#outputHtml::-ms-input-placeholder {
 
 .columns-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 16fr 1fr 16fr;
   gap: 1rem;
 }
 
@@ -206,6 +207,14 @@ textarea#outputHtml::-ms-input-placeholder {
 .rightCol {
   display: flex;
   flex-direction: column;
+}
+
+.centerCol {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 3rem;
 }
 
 /* CONTENTEDITABLE (#previewArea) placeholder */
