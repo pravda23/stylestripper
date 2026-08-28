@@ -3,7 +3,7 @@ export default async function (req, res) {
     return res.status(405).json({ error: "Only POST requests are allowed" });
   }
 
-  const apiKey = process.env.HF_API_KEY_02;
+  const apiKey = process.env.HF_API_KEY_01;
   const { inputs, prompt } = req.body;
 
   console.log("Inference request:", prompt, inputs);
