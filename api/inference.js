@@ -23,7 +23,7 @@ export default async function (req, res) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "SUPPORTED_MODEL_ID:novita",
+          model: "deepseek-ai/DeepSeek-V4-Flash:novita",
           messages: [{ role: "user", content: `${prompt} ${inputs}` }],
           max_tokens: 2048,
         }),
