@@ -30,10 +30,21 @@ export default async function (req, res) {
       },
     );
 
+    // const result = await response.json();
+    // console.log("HF API response:", JSON.stringify(result, null, 2));
+    // res.status(200).json(result);
+
     const result = await response.json();
-    console.log("HF API response:", JSON.stringify(result, null, 2));
-    res.status(200).json(result);
+
+    if (!response.ok) {
+      console.error("Hugging Face status:", response.status);
+      console.error("Hugging Face error:", result);
+      return res.status(response.status).json(result);
+    }
+
+    return res.status(200).json(result);
   } catch (err) {
+    console.log("catch block");
     console.error("API error:", err);
     res.status(500).json({ error: "Inference failed" });
   }
