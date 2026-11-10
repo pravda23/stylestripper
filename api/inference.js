@@ -15,7 +15,7 @@ export default async function (req, res) {
 
   try {
     const response = await fetch(
-      "https://router.huggingface.co/novita/v3/openai/chat/completions",
+      "https://router.huggingface.co/v1/chat/completions",
       {
         method: "POST",
         headers: {
@@ -23,8 +23,8 @@ export default async function (req, res) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "meta-llama/llama-4-scout-17b-16e-instruct",
-          messages: [{ role: "user", content: prompt + " " + inputs }],
+          model: "SUPPORTED_MODEL_ID:novita",
+          messages: [{ role: "user", content: `${prompt} ${inputs}` }],
           max_tokens: 2048,
         }),
       },
