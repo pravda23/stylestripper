@@ -283,7 +283,7 @@ function extractInferenceText(data) {
 
 // Run inference on button click
 async function runInference(key, prompt) {
-  console.log("prompt after runInference button click " + prompt);
+  // console.log("prompt after runInference button click " + prompt);
   const input = document.getElementById("outputHtml").value;
 
   const socialKeys = ["keyPoints", "socialShort", "socialLong"];
